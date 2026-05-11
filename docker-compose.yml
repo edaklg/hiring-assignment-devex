@@ -48,5 +48,22 @@ services:
       retries: 5
 
 
+  insights:
+    build:
+      context: ./insights
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      REGISTRY_URL: "http://registry:8080"
+    depends_on:
+      registry:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   mongo-data:
