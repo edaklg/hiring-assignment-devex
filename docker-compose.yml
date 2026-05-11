@@ -1,0 +1,52 @@
+services:
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mongo-seed:
+    image: mongo:7
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      - ./deployment-registry/seed-data.json:/seed-data.json:ro
+    command: >
+      mongoimport
+        --host mongo
+        --db deployment-registry
+        --collection deployments
+        --jsonArray
+        --file /seed-data.json
+    restart: "no"
+
+  registry:
+    build:
+      context: ./deployment-registry
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      MongoDb__ConnectionString: "mongodb://mongo:27017"
+      MongoDb__DatabaseName: "deployment-registry"
+      MongoDb__CollectionName: "deployments"
+      ASPNETCORE_URLS: "http://+:8080"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/8080"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+volumes:
+  mongo-data:
