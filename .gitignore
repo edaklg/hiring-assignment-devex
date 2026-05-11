@@ -13,3 +13,9 @@ obj/
 .DS_Store
 Thumbs.db
 .env
+insights/.venv/
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.backup
+**/__pycache__/
+**/.pytest_cache/
