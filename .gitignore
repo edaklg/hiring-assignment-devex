@@ -13,3 +13,6 @@ obj/
 .DS_Store
 Thumbs.db
 .env
+insights/.venv/
+**/__pycache__/
+**/.pytest_cache/
